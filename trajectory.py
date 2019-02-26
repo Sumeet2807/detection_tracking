@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import os
 import argparse
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -8,23 +9,36 @@ from mpl_toolkits import mplot3d
 
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", required=True, help="path to the video file")
-ap.add_argument("-t", "--thresh", default=10, help="path to the video file")
-ap.add_argument("-f", "--frames", default=10, help="path to the video file")
-ap.add_argument("-l", "--length", default=10, help="path to the video file")
+ap.add_argument("-i", "--input", required=True, help="path to the pyd files")
+ap.add_argument("-t", "--thresh", default=10, help="min distance between centroids")
+ap.add_argument("-f", "--frames", default=10, help="min time difference between centroids to be considered single path")
+ap.add_argument("-l", "--length", default=1, help="minimum path lengths to be output")
 args = vars(ap.parse_args())
 
-file_name = args["video"] + ".pyd"
 
+files = os.listdir(args["input"])
+files.sort()
 
-with open(file_name, "rb") as f:
-	frame_centroids = pickle.load(f)
-	
+frame_centroids = []
+print("loading files...")
+for file in files:
+	if file.endswith(".pyd"):		
+
+		file_name = args["input"] + "/" + file
+		with open(file_name, "rb") as f:
+			centroids = pickle.load(f)
+
+		frame_centroids.extend(centroids)	
 
 #trajectory manipulate
-tracks = []
 
+print(len(frame_centroids))
+tracks = []
+print("generating tracks...")
+index = 0
 for cntrs in frame_centroids:
+	index += 1
+	print(index)
 	if len(tracks) == 0:		
 		tracks.append([cntrs])
 
@@ -56,7 +70,7 @@ for cntrs in frame_centroids:
 			
 print(len(tracks))
 
-
+print("plotting graphs...")
 colors = cm.rainbow(np.linspace(0, 3, len(tracks)))
 
 
@@ -83,7 +97,7 @@ print(total)
 #ax.axis([0,W,0,600,H,0])
 #plt.scatter(x_plt, y_plt, s=1)
 plt.axis([0,500,300,0])
-plt.show()
+plt.savefig("graph.png")
 
 
 
