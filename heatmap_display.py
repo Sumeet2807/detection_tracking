@@ -6,10 +6,16 @@ Licensed under the MIT license. See LICENSE file in the project root for full li
 import numpy as np
 import cv2
 import copy
+import argparse
 import pickle
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--input", required=True, help="input file")
+# ap.add_argument("-a", "--min-area", type=int, default=250, help="minimum area size")
+args = vars(ap.parse_args())
+
 def main():
-    with open("hm.pyd", "rb") as f:
+    with open(args["input"], "rb") as f:
             images = pickle.load(f)
 
     accum_image = images[1]
@@ -18,7 +24,6 @@ def main():
     max_pixel = np.max(accum_image)
     accum_image = accum_image * (255/max_pixel)    
     accum_image = accum_image.astype(dtype=np.uint8)
-    print (accum_image.dtype)
     # apply a color map
     # COLORMAP_PINK also works well, COLORMAP_BONE is acceptable if the background is dark
     color_image = im_color = cv2.applyColorMap(accum_image, cv2.COLORMAP_JET)
